@@ -58,7 +58,7 @@ lazy val buildSettings = Seq(
   organization := "com.snowplowanalytics",
   name := "snowplow-stream-collector",
   description := "Scala Stream Collector for Snowplow raw events",
-  scalaVersion := "2.12.10",
+  scalaVersion := "2.12.15",
   javacOptions := Seq("-source", "11", "-target", "11"),
   resolvers ++= Dependencies.resolutionRepos
 )
@@ -89,7 +89,7 @@ lazy val allSettings = buildSettings ++
 lazy val root = project
   .in(file("."))
   .settings(buildSettings ++ dynVerSettings)
-  .aggregate(core, kinesis, pubsub, kafka, nsq, stdout, sqs)
+  .aggregate(core, kinesis, pubsub, kafka, pulsar, nsq, stdout, sqs)
 
 lazy val core = project
   .settings(moduleName := "snowplow-stream-collector-core")
@@ -146,6 +146,19 @@ lazy val kafka = project
   .settings(buildInfoSettings)
   .dependsOn(core % "test->test;compile->compile")
 
+lazy val pulsar = project
+  .settings(moduleName := "snowplow-stream-collector-pulsar")
+  .settings(allSettings)
+  .settings(Docker / packageName := "scala-stream-collector-pulsar")
+  .settings(
+    libraryDependencies ++= Seq(
+      Dependencies.Libraries.pulsarClient
+    )
+  )
+  .enablePlugins(JavaAppPackaging, DockerPlugin, BuildInfoPlugin)
+  .settings(buildInfoSettings)
+  .dependsOn(core % "test->test;compile->compile")
+
 lazy val nsq = project
   .settings(moduleName := "snowplow-stream-collector-nsq")
   .settings(allSettings)
@@ -168,3 +181,4 @@ lazy val stdout = project
   .enablePlugins(JavaAppPackaging, DockerPlugin, BuildInfoPlugin)
   .settings(buildInfoSettings)
   .dependsOn(core % "test->test;compile->compile")
+
