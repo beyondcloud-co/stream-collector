@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021 Snowplow Analytics Ltd.
+ * Copyright (c) 2013-2022 Snowplow Analytics Ltd.
  * All rights reserved.
  *
  * This program is licensed to you under the Apache License Version 2.0,
@@ -30,5 +30,6 @@ trait Sink {
   lazy val log = LoggerFactory.getLogger(getClass())
 
   def isHealthy: Boolean = true
-  def storeRawEvents(events: List[Array[Byte]], key: String): List[Array[Byte]]
+  def storeRawEvents(events: List[Array[Byte]], key: String): Unit
+  def shutdown(): Unit
 }

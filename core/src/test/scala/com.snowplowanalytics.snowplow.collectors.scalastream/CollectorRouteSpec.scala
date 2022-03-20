@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021 Snowplow Analytics Ltd. All rights reserved.
+ * Copyright (c) 2013-2022 Snowplow Analytics Ltd. All rights reserved.
  *
  * This program is licensed to you under the Apache License Version 2.0, and
  * you may not use this file except in compliance with the Apache License
@@ -47,12 +47,15 @@ class CollectorRouteSpec extends Specification with Specs2RouteTest {
           doNotTrack: Boolean,
           contentType: Option[ContentType] = None,
           spAnonymous: Option[String]      = spAnonymous
-        ): (HttpResponse, List[Array[Byte]])                       = (HttpResponse(200, entity = s"cookie"), List.empty)
+        ): HttpResponse                                            = HttpResponse(200, entity = s"cookie")
         def cookieName: Option[String]                             = Some("name")
         def doNotTrackCookie: Option[DntCookieMatcher]             = None
         def determinePath(vendor: String, version: String): String = "/p1/p2"
         def enableDefaultRedirect: Boolean                         = withRedirects
         def sinksHealthy: Boolean                                  = true
+      }
+      override val healthService = new HealthService {
+        def isHealthy: Boolean = true
       }
     }
   val route                      = mkRoute(true, None)

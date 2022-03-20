@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021 Snowplow Analytics Ltd. All rights reserved.
+ * Copyright (c) 2013-2022 Snowplow Analytics Ltd. All rights reserved.
  *
  * This program is licensed to you under the Apache License Version 2.0, and
  * you may not use this file except in compliance with the Apache License
@@ -24,6 +24,7 @@ import com.snowplowanalytics.snowplow.collectors.scalastream.monitoring.BeanRegi
 
 trait CollectorRoute {
   def collectorService: Service
+  def healthService: HealthService
 
   private val headers = optionalHeaderValueByName("User-Agent") &
     optionalHeaderValueByName("Referer") &
@@ -61,7 +62,7 @@ trait CollectorRoute {
               post {
                 extractContentType { ct =>
                   entity(as[String]) { body =>
-                    val (r, _) = collectorService.cookie(
+                    val r = collectorService.cookie(
                       qs,
                       Some(body),
                       path,
@@ -82,7 +83,7 @@ trait CollectorRoute {
                 }
               } ~
                 (get | head) {
-                  val (r, _) = collectorService.cookie(
+                  val r = collectorService.cookie(
                     qs,
                     None,
                     path,
@@ -103,7 +104,7 @@ trait CollectorRoute {
             } ~
               path("""ice\.png""".r | "i".r) { path =>
                 (get | head) {
-                  val (r, _) = collectorService.cookie(
+                  val r = collectorService.cookie(
                     qs,
                     None,
                     "/" + path,
@@ -172,7 +173,10 @@ trait CollectorRoute {
 
   private def healthRoute: Route = get {
     path("health".r) { _ =>
-      complete(HttpResponse(200, entity = "OK"))
+      if (healthService.isHealthy)
+        complete(HttpResponse(200, entity = "OK"))
+      else
+        complete(HttpResponse(503, entity = "Service Unavailable"))
     }
   }
 

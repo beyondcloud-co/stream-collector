@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021 Snowplow Analytics Ltd. All rights reserved.
+ * Copyright (c) 2013-2022 Snowplow Analytics Ltd. All rights reserved.
  *
  * This program is licensed to you under the Apache License Version 2.0, and
  * you may not use this file except in compliance with the Apache License
@@ -93,7 +93,10 @@ package model {
     minBackoff: Long,
     maxBackoff: Long,
     totalBackoff: Long,
-    multiplier: Double
+    multiplier: Double,
+    initialRpcTimeout: Long,
+    maxRpcTimeout: Long,
+    rpcTimeoutMultiplier: Double
   )
   sealed trait SinkConfig
   final case class AWSConfig(accessKey: String, secretKey: String)
@@ -146,7 +149,7 @@ package model {
     interval: FiniteDuration = 60.minutes,
     // http params
     method: String  = "POST",
-    url: String     = "collector-g.snowplowanalytics.com",
+    url: String     = "telemetry-g.snowplowanalytics.com",
     port: Int       = 443,
     secure: Boolean = true,
     // Params injected by deployment scripts
@@ -179,7 +182,11 @@ package model {
     telemetry: Option[TelemetryConfig],
     ssl: SSLConfig = SSLConfig(),
     enableDefaultRedirect: Boolean,
-    enableStartupChecks: Boolean
+    redirectDomains: Set[String],
+    enableStartupChecks: Boolean,
+    terminationDeadline: FiniteDuration,
+    preTerminationPeriod: FiniteDuration,
+    preTerminationUnhealthy: Boolean
   ) {
     val cookieConfig = if (cookie.enabled) Some(cookie) else None
     val doNotTrackHttpCookie =

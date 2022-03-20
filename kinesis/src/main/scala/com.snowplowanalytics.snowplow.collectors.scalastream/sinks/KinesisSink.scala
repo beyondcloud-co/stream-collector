@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021 Snowplow Analytics Ltd. All rights reserved.
+ * Copyright (c) 2013-2022 Snowplow Analytics Ltd. All rights reserved.
  *
  * This program is licensed to you under the Apache License Version 2.0,
  * and you may not use this file except in compliance with the Apache License Version 2.0.
@@ -51,8 +51,6 @@ class KinesisSink private (
 ) extends Sink {
   import KinesisSink._
 
-  log.info("Creating thread pool of size " + kinesisConfig.threadPoolSize)
-
   maybeSqs match {
     case Some(sqs) =>
       log.info(
@@ -91,10 +89,8 @@ class KinesisSink private (
   @volatile private var outage: Boolean = false
   override def isHealthy: Boolean       = !outage
 
-  override def storeRawEvents(events: List[Array[Byte]], key: String): List[Array[Byte]] = {
+  override def storeRawEvents(events: List[Array[Byte]], key: String): Unit =
     events.foreach(e => EventStorage.store(e, key))
-    Nil
-  }
 
   object EventStorage {
     private val storedEvents              = ListBuffer.empty[Events]
@@ -355,6 +351,7 @@ class KinesisSink private (
   }
 
   def shutdown(): Unit = {
+    EventStorage.flush()
     executorService.shutdown()
     executorService.awaitTermination(10000, MILLISECONDS)
     ()
@@ -414,16 +411,6 @@ object KinesisSink {
             sqsClientAndName
           )
         ks.EventStorage.scheduleFlush()
-
-        // When the application is shut down try to send all stored events
-        Runtime
-          .getRuntime
-          .addShutdownHook(new Thread {
-            override def run(): Unit = {
-              ks.EventStorage.flush()
-              ks.shutdown()
-            }
-          })
         ks
     }
   }

@@ -1,5 +1,5 @@
 /**
-  * Copyright (c) 2014-2021 Snowplow Analytics Ltd.
+  * Copyright (c) 2014-2022 Snowplow Analytics Ltd.
   * All rights reserved.
   *
   * This program is licensed to you under the Apache License Version 2.0,
@@ -77,10 +77,14 @@ abstract class ConfigSpec extends Specification {
       enabled                  = false,
       durationBucketsInSeconds = None
     ),
-    telemetry             = Some(TelemetryConfig()),
-    ssl                   = SSLConfig(enable = false, redirect = false, port = 443),
-    enableDefaultRedirect = false,
-    enableStartupChecks   = true,
+    telemetry               = Some(TelemetryConfig()),
+    ssl                     = SSLConfig(enable = false, redirect = false, port = 443),
+    enableDefaultRedirect   = false,
+    enableStartupChecks     = true,
+    redirectDomains         = Set.empty,
+    terminationDeadline     = 10.seconds,
+    preTerminationPeriod    = 10.seconds,
+    preTerminationUnhealthy = false,
     streams = StreamsConfig(
       good                       = "good",
       bad                        = "bad",
@@ -110,10 +114,13 @@ abstract class ConfigSpec extends Specification {
       GooglePubSub(
         googleProjectId = "googleProjectId",
         backoffPolicy = GooglePubSubBackoffPolicyConfig(
-          minBackoff   = 1000,
-          maxBackoff   = 1000,
-          totalBackoff = 10000,
-          multiplier   = 2
+          minBackoff           = 1000,
+          maxBackoff           = 1000,
+          totalBackoff         = 9223372036854L,
+          multiplier           = 2,
+          initialRpcTimeout    = 10000,
+          maxRpcTimeout        = 10000,
+          rpcTimeoutMultiplier = 2
         )
       )
     case "sqs" =>

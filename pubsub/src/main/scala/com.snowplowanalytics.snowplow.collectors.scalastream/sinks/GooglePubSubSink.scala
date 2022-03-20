@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021 Snowplow Analytics Ltd. All rights reserved.
+ * Copyright (c) 2013-2022 Snowplow Analytics Ltd. All rights reserved.
  *
  * This program is licensed to you under the Apache License Version 2.0,
  * and you may not use this file except in compliance with the Apache License Version 2.0.
@@ -48,7 +48,7 @@ class GooglePubSubSink private (publisher: Publisher, topicName: String) extends
     * @param events The list of events to send
     * @param key Not used.
     */
-  override def storeRawEvents(events: List[Array[Byte]], key: String): List[Array[Byte]] = {
+  override def storeRawEvents(events: List[Array[Byte]], key: String): Unit = {
     if (events.nonEmpty)
       log.debug(s"Writing ${events.size} Thrift records to Google PubSub topic $topicName.")
     events.foreach { event =>
@@ -77,8 +77,10 @@ class GooglePubSubSink private (publisher: Publisher, topicName: String) extends
         )
       }
     }
-    Nil
   }
+
+  override def shutdown(): Unit =
+    publisher.shutdown()
 
   /**
     * Convert event bytes to a PubsubMessage to be published
@@ -145,9 +147,9 @@ object GooglePubSubSink {
       .setMaxRetryDelay(Duration.ofMillis(backoffPolicy.maxBackoff))
       .setRetryDelayMultiplier(backoffPolicy.multiplier)
       .setTotalTimeout(Duration.ofMillis(backoffPolicy.totalBackoff))
-      .setInitialRpcTimeout(Duration.ofSeconds(10))
-      .setRpcTimeoutMultiplier(2)
-      .setMaxRpcTimeout(Duration.ofSeconds(10))
+      .setInitialRpcTimeout(Duration.ofMillis(backoffPolicy.initialRpcTimeout))
+      .setRpcTimeoutMultiplier(backoffPolicy.rpcTimeoutMultiplier)
+      .setMaxRpcTimeout(Duration.ofMillis(backoffPolicy.maxRpcTimeout))
       .build()
 
   /** Checks that a PubSub topic exists **/

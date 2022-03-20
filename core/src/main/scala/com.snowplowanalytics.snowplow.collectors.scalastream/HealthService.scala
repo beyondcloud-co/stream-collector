@@ -12,15 +12,22 @@
  * implied.  See the Apache License Version 2.0 for the specific language
  * governing permissions and limitations there under.
  */
-package com.snowplowanalytics.snowplow.collectors.scalastream.telemetry
+package com.snowplowanalytics.snowplow.collectors.scalastream
 
-import io.circe.Encoder
+import java.util.concurrent.atomic.AtomicBoolean
 
-sealed trait CloudVendor
+trait HealthService {
+  def isHealthy: Boolean
+}
 
-object CloudVendor {
-  case object Aws extends CloudVendor
-  case object Gcp extends CloudVendor
+object HealthService {
 
-  implicit val encoder: Encoder[CloudVendor] = Encoder.encodeString.contramap[CloudVendor](_.toString().toUpperCase())
+  class Settable extends HealthService {
+    private val ref = new AtomicBoolean(true)
+
+    override def isHealthy: Boolean = ref.get
+
+    def toUnhealthy(): Unit = ref.set(false)
+  }
+
 }

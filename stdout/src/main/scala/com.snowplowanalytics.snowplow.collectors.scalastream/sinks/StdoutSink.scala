@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021 Snowplow Analytics Ltd.
+ * Copyright (c) 2013-2022 Snowplow Analytics Ltd.
  * All rights reserved.
  *
  * This program is licensed to you under the Apache License Version 2.0,
@@ -25,7 +25,7 @@ class StdoutSink(streamName: String) extends Sink {
   override val MaxBytes = Int.MaxValue
 
   // Print a Base64-encoded event.
-  override def storeRawEvents(events: List[Array[Byte]], key: String): List[Array[Byte]] = {
+  override def storeRawEvents(events: List[Array[Byte]], key: String): Unit =
     streamName match {
       case "out" =>
         events.foreach { e =>
@@ -36,6 +36,6 @@ class StdoutSink(streamName: String) extends Sink {
           Console.err.println(Base64.encodeBase64String(e))
         }
     }
-    Nil
-  }
+
+  override def shutdown(): Unit = ()
 }

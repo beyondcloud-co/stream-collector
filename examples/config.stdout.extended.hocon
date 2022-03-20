@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2021 Snowplow Analytics Ltd. All rights reserved.
+# Copyright (c) 2013-2022 Snowplow Analytics Ltd. All rights reserved.
 #
 # This program is licensed to you under the Apache License Version 2.0, and
 # you may not use this file except in compliance with the Apache License
@@ -132,6 +132,12 @@ collector {
   # Custom redirects configured in `paths` can still be used.
   enableDefaultRedirect = false
 
+  # Domains which are valid for collector redirects. If empty (the default) then redirects are
+  # allowed to any domain.
+  redirectDomains = [
+    # "acme1.com"
+  ]
+
   # When enabled, the redirect url passed via the `u` query parameter is scanned for a placeholder
   # token. All instances of that token are replaced withe the network ID. If the placeholder isn't
   # specified, the default value is `${SP_NUID}`.
@@ -210,10 +216,21 @@ collector {
 
       # Connection properties for the receiving pipeline
       method = POST
-      url = collector-g.snowplowanalytics.com
+      url = telemetry-g.snowplowanalytics.com
       port = 443
       secure = true
    }
+
+  # Configures how long the colletor should pause after receiving a sigterm before starting the graceful shutdown.
+  # During this period the collector continues to accept new connections and respond to requests.
+  preTerminationPeriod = 10 seconds
+
+  # During the preTerminationPeriod, the collector can be configured to return 503s on the /health endpoint
+  # Can be helpful for removing the collector from a load balancer's targets.
+  preTerminationUnhealthy = false
+
+  # The akka server's deadline for closing connections during graceful shutdown
+  terminationDeadline = 10 seconds
 }
 
 # Akka has a variety of possible configuration options defined at

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021 Snowplow Analytics Ltd. All rights reserved.
+ * Copyright (c) 2013-2022 Snowplow Analytics Ltd. All rights reserved.
  *
  * This program is licensed to you under the Apache License Version 2.0, and
  * you may not use this file except in compliance with the Apache License
@@ -22,13 +22,13 @@ import com.snowplowanalytics.snowplow.collectors.scalastream.sinks.SqsSink
 import com.snowplowanalytics.snowplow.collectors.scalastream.telemetry.TelemetryAkkaService
 
 object SqsCollector extends Collector {
-  def appName      = BuildInfo.moduleName
+  def appName      = BuildInfo.shortName
   def appVersion   = BuildInfo.version
   def scalaVersion = BuildInfo.scalaVersion
 
   def main(args: Array[String]): Unit = {
     val (collectorConf, akkaConf) = parseConfig(args)
-    val telemetry                 = TelemetryAkkaService.initWithCollector(collectorConf, appName, appVersion)
+    val telemetry                 = TelemetryAkkaService.initWithCollector(collectorConf, BuildInfo.moduleName, appVersion)
     val sinks: Either[Throwable, CollectorSinks] = for {
       sqs <- collectorConf.streams.sink match {
         case sqs: Sqs => sqs.asRight

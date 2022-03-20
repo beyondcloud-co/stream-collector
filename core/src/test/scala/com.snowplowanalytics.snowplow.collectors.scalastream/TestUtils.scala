@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021 Snowplow Analytics Ltd. All rights reserved.
+ * Copyright (c) 2013-2022 Snowplow Analytics Ltd. All rights reserved.
  *
  * This program is licensed to you under the Apache License Version 2.0, and
  * you may not use this file except in compliance with the Apache License
@@ -58,9 +58,13 @@ object TestUtils {
         ),
         buffer = BufferConfig(4000000L, 500L, 60000L)
       ),
-      telemetry             = None,
-      prometheusMetrics     = PrometheusMetricsConfig(false, None),
-      enableStartupChecks   = true,
-      enableDefaultRedirect = false
+      telemetry               = None,
+      prometheusMetrics       = PrometheusMetricsConfig(false, None),
+      enableStartupChecks     = true,
+      enableDefaultRedirect   = false,
+      redirectDomains         = Set("localhost"),
+      terminationDeadline     = 10.seconds,
+      preTerminationPeriod    = 10.seconds,
+      preTerminationUnhealthy = false
     )
 }
